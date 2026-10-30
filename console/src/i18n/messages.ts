@@ -6,6 +6,7 @@
 import type { Locale } from './index';
 import { admin } from './messages/admin';
 import { auth } from './messages/auth';
+import { catalog } from './messages/catalog';
 import { common } from './messages/common';
 import { core } from './messages/core';
 import { deploy } from './messages/deploy';
@@ -15,6 +16,7 @@ import { tokens } from './messages/tokens';
 
 const PARTS: ReadonlyArray<Record<Locale, Record<string, string>>> = [
   common,
+  catalog,
   sites,
   deploy,
   settings,

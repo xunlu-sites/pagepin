@@ -15,5 +15,7 @@ export const {
   deviceAuths,
   handoffCodes,
   deploySessions,
+  catalogFolders,
+  catalogItems,
   accountMerges,
 } = buildSchema(mysqlKit);

@@ -11,6 +11,7 @@ import { CornerLang } from './components/LanguageSwitcher';
 import { Login } from './components/Login';
 import { Settings } from './components/Settings';
 import { Signup } from './components/Signup';
+import { CatalogView } from './components/CatalogView';
 import { SitesView } from './components/SitesView';
 import { Toaster } from './components/Toast';
 import { TopBar } from './components/TopBar';
@@ -106,13 +107,16 @@ export default function App() {
     );
   }
 
+  const home = !me.needs_handle && path !== '/sites' ? <CatalogView /> : <SitesView />;
   return (
     <div className="min-h-screen">
       <TopBar />
-      {me.needs_handle ? <HandleSetup /> : <SitesView />}
+      {me.needs_handle ? <HandleSetup /> : home}
       <Toaster />
       <Confirmer />
-      <footer className="pb-8 pt-4 text-center text-xs text-ink-300">{t('app.footer')}</footer>
+      {path === '/sites' && (
+        <footer className="pb-8 pt-4 text-center text-xs text-ink-300">{t('app.footer')}</footer>
+      )}
     </div>
   );
 }

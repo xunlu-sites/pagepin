@@ -124,6 +124,36 @@ export interface VersionsOut {
   versions: VersionItem[];
 }
 
+export interface CatalogSite {
+  id: string;
+  slug: string;
+  title: string | null;
+  url: string;
+  visibility: Visibility;
+  updated_at: string;
+  unresolved_comments: number;
+  suspended: boolean;
+}
+
+export interface CatalogFolder {
+  id: string;
+  parent_id: string | null;
+  name: string;
+  sort_order: number;
+}
+
+export interface CatalogItem {
+  site_id: string;
+  folder_id: string;
+  sort_order: number;
+}
+
+export interface CatalogTree {
+  folders: CatalogFolder[];
+  items: CatalogItem[];
+  sites: CatalogSite[];
+}
+
 export interface TokenItem {
   id: string;
   name: string;

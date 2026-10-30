@@ -26,6 +26,16 @@ export function TopBar() {
             </span>
           </span>
           <span className="hidden text-xs text-ink-400 sm:inline">{t('topbar.tagline')}</span>
+          {me && !me.needs_handle && (
+            <nav className="ml-2 flex items-center gap-2 text-xs">
+              <a className="text-tide-700" href="/">
+                {t('catalog.nav')}
+              </a>
+              <a className="text-ink-400 hover:text-ink-700" href="/sites">
+                {t('catalog.sites')}
+              </a>
+            </nav>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {me && (

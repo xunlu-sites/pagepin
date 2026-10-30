@@ -43,6 +43,13 @@
       "when": 1784184296467,
       "tag": "0005_pale_banshee",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1784300000000,
+      "tag": "0006_catalog",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import type {
   ShareLinkOut,
   SiteOut,
   TokenItem,
+  CatalogTree,
   Usage,
   VersionsOut,
   Visibility,
@@ -220,6 +221,37 @@ export const api = {
 
   revokeToken: (id: string) =>
     request<{ ok: true }>(`/api/tokens/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  catalog: () => request<CatalogTree>('/api/catalog'),
+  createFolder: (name: string, parentId?: string | null) =>
+    request<{ id: string }>('/api/catalog/folders', {
+      method: 'POST',
+      body: JSON.stringify({ name, parent_id: parentId ?? null }),
+    }),
+  deleteFolder: (id: string) =>
+    request<{ ok: true }>(`/api/catalog/folders/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  placeSite: (siteId: string, folderId: string) =>
+    request<{ id: string }>('/api/catalog/items', {
+      method: 'POST',
+      body: JSON.stringify({ site_id: siteId, folder_id: folderId }),
+    }),
+  unplaceSite: (siteId: string) =>
+    request<{ ok: true }>(`/api/catalog/items/${encodeURIComponent(siteId)}`, { method: 'DELETE' }),
+  reorderSites: (folderId: string, siteIds: string[]) =>
+    request<{ ok: true }>('/api/catalog/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ folder_id: folderId, site_ids: siteIds }),
+    }),
+  renameFolder: (id: string, name: string) =>
+    request<{ ok: true }>(`/api/catalog/folders/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }),
+  mergeFolder: (id: string, intoId: string) =>
+    request<{ ok: true }>(`/api/catalog/folders/${encodeURIComponent(id)}/merge`, {
+      method: 'POST',
+      body: JSON.stringify({ into_id: intoId }),
+    }),
 
   // ---- device authorization (OAuth2 device grant) ----
   approveDevice: (userCode: string) =>

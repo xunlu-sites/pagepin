@@ -59,4 +59,6 @@ export const instanceSettings = t.instanceSettings as typeof sqliteSchema.instan
 export const deviceAuths = t.deviceAuths as typeof sqliteSchema.deviceAuths;
 export const handoffCodes = t.handoffCodes as typeof sqliteSchema.handoffCodes;
 export const deploySessions = t.deploySessions as typeof sqliteSchema.deploySessions;
+export const catalogFolders = t.catalogFolders as typeof sqliteSchema.catalogFolders;
+export const catalogItems = t.catalogItems as typeof sqliteSchema.catalogItems;
 export const accountMerges = t.accountMerges as typeof sqliteSchema.accountMerges;

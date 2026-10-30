@@ -221,6 +221,36 @@ export function buildSchema(kit: ColumnKit) {
     ],
   );
 
+  const catalogFolders = table(
+    'catalog_folders',
+    {
+      id: str('id', 64).primaryKey(),
+      ownerId: str('owner_id', 64).notNull(),
+      parentId: str('parent_id', 64),
+      name: str('name', 200).notNull(),
+      sortOrder: int('sort_order').notNull().default(0),
+      createdAt: str('created_at', 40).notNull(),
+      updatedAt: str('updated_at', 40).notNull(),
+    },
+    (t: any) => [index('catalog_folders_owner_idx').on(t.ownerId)],
+  );
+
+  const catalogItems = table(
+    'catalog_items',
+    {
+      id: str('id', 64).primaryKey(),
+      ownerId: str('owner_id', 64).notNull(),
+      folderId: str('folder_id', 64).notNull(),
+      siteId: str('site_id', 64).notNull(),
+      sortOrder: int('sort_order').notNull().default(0),
+      createdAt: str('created_at', 40).notNull(),
+    },
+    (t: any) => [
+      unique('catalog_items_owner_site_uq').on(t.ownerId, t.siteId),
+      index('catalog_items_folder_idx').on(t.folderId),
+    ],
+  );
+
   const accountMerges = table(
     'account_merges',
     {
@@ -247,6 +277,8 @@ export function buildSchema(kit: ColumnKit) {
     deviceAuths,
     handoffCodes,
     deploySessions,
+    catalogFolders,
+    catalogItems,
     accountMerges,
   };
 }

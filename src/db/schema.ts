@@ -285,6 +285,38 @@ export const deploySessions = sqliteTable(
 
 /** 账号合并日志 + 冲突标记(reconcile 用)。loserId 唯一 = 一个账号只会被吸收一次的闩锁;
  *  status: moving(进行中,可恢复)| done | conflict(两边都有内容,需人工)。 */
+/** 原型目录分组。parent_id 为空是顶层，下面可以继续嵌套。 */
+export const catalogFolders = sqliteTable(
+  'catalog_folders',
+  {
+    id: text('id').primaryKey(),
+    ownerId: text('owner_id').notNull(),
+    parentId: text('parent_id'),
+    name: text('name').notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [index('catalog_folders_owner_idx').on(t.ownerId)],
+);
+
+/** 站点在目录中的位置。一个站点最多进一个分组；没有行 = 未入组。 */
+export const catalogItems = sqliteTable(
+  'catalog_items',
+  {
+    id: text('id').primaryKey(),
+    ownerId: text('owner_id').notNull(),
+    folderId: text('folder_id').notNull(),
+    siteId: text('site_id').notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [
+    uniqueIndex('catalog_items_owner_site_uq').on(t.ownerId, t.siteId),
+    index('catalog_items_folder_idx').on(t.folderId),
+  ],
+);
+
 export const accountMerges = sqliteTable(
   'account_merges',
   {
