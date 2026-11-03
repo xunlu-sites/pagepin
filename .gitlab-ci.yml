@@ -1,0 +1,67 @@
+# pagepin GitLab CI — 自建 Runner 192.168.110.201（看板 #248）
+# Build-only by default. Push is manual and gated. No deploy job.
+#
+# 对齐 task-board / ai_news / viral-video-remix-demo：
+# stages = build + push；build 每次都跑；push 仅 PUSH_IMAGE==true 且手动。
+#
+# Runner：docker executor，机器上常见名称 second-brain-docker，通常不打 tag。
+# 本文件不写 tags:，交给这台未打标签的 runner 领取。
+# No job tags. The runner on 201 is typically untagged.
+#
+# docker executor 必须把宿主机 socket 挂进作业容器，否则 CLI 没有引擎。
+# 在 runner 的 config.toml 配置（不要在本仓库改 runner）：
+# The docker executor must mount the host socket. Example config.toml:
+#   [runners.docker]
+#     volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+# DOCKER_HOST 指向该 socket。不用 dind。
+#
+# 私有库 192.168.110.201:5000 若是 HTTP，宿主机 dockerd 还需：
+#   insecure-registries: ["192.168.110.201:5000"]
+# If the registry is plain HTTP, the host dockerd needs that insecure-registries entry.
+#
+# 没有 deploy stage，本流水线不部署。
+# .github/workflows 仍是公开 CI，本文件不替换、不关闭它们。
+
+stages:
+  - build
+  - push
+
+variables:
+  # 默认关。只有项目级 CI/CD 变量把 PUSH_IMAGE 设为字符串 "true" 时，push_image 才会出现。
+  # Default off. A project variable PUSH_IMAGE=true only reveals the manual job; it still does not auto-push.
+  PUSH_IMAGE: "false"
+  REGISTRY: "192.168.110.201:5000"
+  IMAGE_NAME: "pagepin"
+  DOCKER_HOST: "unix:///var/run/docker.sock"
+  # 官方 docker 镜像默认 DOCKER_TLS_CERTDIR=/certs；走 unix socket 时必须清空，否则客户端去找 TLS。
+  # The official docker image expects TLS certs unless this is empty.
+  DOCKER_TLS_CERTDIR: ""
+
+default:
+  image: docker:27-cli
+
+build:
+  stage: build
+  script:
+    - docker info
+    - docker build -f Dockerfile -t "$REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" .
+  # 只构建到本机 dockerd，不登录、不推送。镜像名 pagepin，标签为提交短 SHA。
+  # Build on the host daemon via the root Dockerfile. No login, no push.
+
+push_image:
+  stage: push
+  rules:
+    # 两个条件都要：变量打开，并且有人在界面上手点。allow_failure 让没人点时流水线仍可成功。
+    # Both gates: PUSH_IMAGE=true AND a manual click. allow_failure keeps an unclicked job from failing the pipeline.
+    - if: '$PUSH_IMAGE == "true"'
+      when: manual
+      allow_failure: true
+    - when: never
+  script:
+    # 推送前重建，不依赖 build job 是否打在同一台 daemon 上。
+    # REGISTRY_USER / REGISTRY_PASSWORD 只在本 job 读取（GitLab CI/CD 变量，masked）。
+    # Rebuild here, then push the SHA tag only. Credentials are used only in this job.
+    - docker info
+    - echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin
+    - docker build -f Dockerfile -t "$REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" .
+    - docker push "$REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
